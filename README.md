@@ -1,6 +1,6 @@
 # 💍 Wedding Cloud - Dashboard de Mariage Sync
 
-Une application web moderne et responsive pour organiser son mariage à deux. Les données sont synchronisées en temps réel entre PC et Mobile grâce à Firebase.
+Une application web moderne et responsive pour organiser son mariage à deux. Les données sont synchronisées en temps réel entre PC et Mobile .
 
 ## ✨ Fonctionnalités
 
