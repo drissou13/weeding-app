@@ -3,20 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wedding Cloud | Accès Sécurisé</title>
+    <title>Wedding Cloud | Notre Mariage</title>
     <style>
-        :root { --sage: #8A9A5B; --cream: #F9F8F4; --dark: #333; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--cream); color: var(--dark); margin: 0; padding: 20px; }
-        .auth-container { max-width: 400px; margin: 100px auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
-        .container { max-width: 800px; margin: 0 auto; display: none; }
+        :root { --sage: #8A9A5B; --cream: #F9F8F4; --gold: #D4AF37; --dark: #333; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--cream); color: var(--dark); margin: 0; padding: 10px; }
+        .auth-container { max-width: 400px; margin: 50px auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
+        .container { max-width: 600px; margin: 0 auto; display: none; }
         .card { background: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: var(--sage); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .profile-btn { width: auto; background: transparent; color: var(--sage); border: 2px solid var(--sage); margin: 5px; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; padding: 12px; background: var(--sage); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; }
+        button:hover { opacity: 0.9; }
+        .profile-btn { width: auto; background: transparent; color: var(--sage); border: 2px solid var(--sage); margin: 5px; padding: 8px 15px; }
         .profile-btn.active { background: var(--sage); color: white; }
-        .item-row { display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid #eee; }
+        .item-row { display: flex; align-items: center; gap: 10px; padding: 12px; border-bottom: 1px solid #eee; }
         .completed { text-decoration: line-through; opacity: 0.5; }
-        header { text-align: center; margin-bottom: 30px; }
+        header { text-align: center; margin-bottom: 20px; }
+        h1 { font-family: Georgia, serif; color: var(--sage); }
+        .delete-btn { background: none; color: #ff7675; border: none; cursor: pointer; width: auto; padding: 0; }
     </style>
 </head>
 <body>
@@ -33,41 +36,59 @@
         </div>
 
         <button id="mainAuthBtn" onclick="handleAuth()">Connexion</button>
-        <p onclick="toggleAuthMode()" id="toggleText" style="cursor:pointer; font-size: 0.8em; margin-top: 15px; color: var(--sage);">Pas encore de compte ? Créer un espace</p>
+        <p onclick="toggleAuthMode()" id="toggleText" style="cursor:pointer; font-size: 0.9em; margin-top: 15px; color: var(--sage); text-decoration: underline;">Pas encore de compte ? Créer un espace</p>
     </div>
 
     <div id="appScreen" class="container">
         <header>
             <h1 id="coupleTitle">Chargement...</h1>
+            <p id="countdown" style="font-weight: bold; color: var(--gold);"></p>
             <div class="profile-switcher">
                 <button class="profile-btn" id="btnP1" onclick="switchUser(1)"></button>
                 <button class="profile-btn" id="btnP2" onclick="switchUser(2)"></button>
             </div>
-            <button onclick="logout()" style="width:auto; background:none; color:red; border:none; margin-top:10px;">Déconnexion</button>
+            <button onclick="logout()" style="width:auto; background:none; color:#999; border:none; margin-top:10px; font-size: 0.8em;">Déconnexion</button>
         </header>
 
         <section class="card">
-            <h3>✅ Tâches</h3>
-            <div style="display:flex; gap:10px;">
-                <input type="text" id="taskInput" placeholder="Ajouter une tâche...">
-                <button onclick="addTask()" style="width:80px;">+</button>
+            <h3>✅ Checklist</h3>
+            <div style="display:flex; gap:5px;">
+                <input type="text" id="taskInput" placeholder="Ex: Choisir le vin..." style="flex:2">
+                <select id="catInput" style="flex:1">
+                    <option value="Logistique">Logistique</option>
+                    <option value="Tenues">Tenues</option>
+                    <option value="Traiteur">Traiteur</option>
+                    <option value="Déco">Déco</option>
+                </select>
+                <button onclick="addTask()" style="width:50px;">+</button>
             </div>
             <div id="todoList"></div>
+        </section>
+
+        <section class="card">
+            <h3>👥 Invités</h3>
+            <div style="display:flex; gap:5px;">
+                <input type="text" id="guestName" placeholder="Nom de l'invité" style="flex:2">
+                <button onclick="addGuest()" style="width:50px;">+</button>
+            </div>
+            <div id="guestList"></div>
         </section>
     </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, set, onValue, push, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, set, onValue, push, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+    // REMPLACE LES "..." PAR TES INFOS FIREBASE
     const firebaseConfig = {
-        apiKey: "TA_CLE_API",
-        authDomain: "TON_PROJET.firebaseapp.com",
-        databaseURL: "https://TON_PROJET-default-rtdb.europe-west1.firebasedatabase.app",
-        projectId: "TON_PROJET",
-        storageBucket: "TON_PROJET.appspot.com",
-        appId: "..."
+        apiKey: "AIzaSyDbGR-FuQVWt-LgiqbWWQY2MRmxgtFRPSQ",
+  authDomain: "wedding-app-e188a.firebaseapp.com",
+  databaseURL: "https://wedding-app-e188a-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "wedding-app-e188a",
+  storageBucket: "wedding-app-e188a.firebasestorage.app",
+  messagingSenderId: "419917976315",
+  appId: "1:419917976315:web:95d3024d4601ffe824565e",
     };
 
     const app = initializeApp(firebaseConfig);
@@ -78,7 +99,7 @@
     let currentUserData = null;
     let selectedPartner = "";
 
-    // 1. GESTION DE L'AUTH (CONNEXION / INSCRIPTION)
+    // GESTION AUTH
     window.toggleAuthMode = () => {
         isRegisterMode = !isRegisterMode;
         document.getElementById('registerFields').style.display = isRegisterMode ? 'block' : 'none';
@@ -90,25 +111,20 @@
     window.handleAuth = async () => {
         const email = document.getElementById('email').value;
         const pass = document.getElementById('password').value;
-
         try {
             if (isRegisterMode) {
                 const p1 = document.getElementById('p1_name').value;
                 const p2 = document.getElementById('p2_name').value;
                 const date = document.getElementById('wedding_date').value;
-                
-                const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
-                // Sauvegarder les infos du couple en base
-                await set(ref(db, 'users/' + userCredential.user.uid + '/config'), {
-                    partner1: p1, partner2: p2, weddingDate: date
-                });
+                if(!p1 || !p2 || !date) return alert("Remplissez tous les champs");
+                const userCred = await createUserWithEmailAndPassword(auth, email, pass);
+                await set(ref(db, 'users/' + userCred.user.uid + '/config'), { partner1: p1, partner2: p2, weddingDate: date });
             } else {
                 await signInWithEmailAndPassword(auth, email, pass);
             }
-        } catch (error) { alert(error.message); }
+        } catch (e) { alert("Erreur: " + e.message); }
     };
 
-    // 2. SURVEILLER L'ÉTAT DE CONNEXION
     onAuthStateChanged(auth, (user) => {
         if (user) {
             document.getElementById('authScreen').style.display = 'none';
@@ -120,19 +136,18 @@
         }
     });
 
-    // 3. CHARGEMENT DES DONNÉES
     function loadData(uid) {
         onValue(ref(db, 'users/' + uid), (snapshot) => {
             const data = snapshot.val();
             if (!data) return;
             currentUserData = data;
-            
             document.getElementById('coupleTitle').innerText = `${data.config.partner1} & ${data.config.partner2}`;
             document.getElementById('btnP1').innerText = data.config.partner1;
             document.getElementById('btnP2').innerText = data.config.partner2;
             if(!selectedPartner) switchUser(1);
-
-            renderTasks(data.tasks, uid);
+            renderTasks(data.tasks);
+            renderGuests(data.guests);
+            updateCountdown(data.config.weddingDate);
         });
     }
 
@@ -142,31 +157,58 @@
         document.getElementById('btnP2').className = n === 2 ? 'profile-btn active' : 'profile-btn';
     };
 
+    // TÂCHES
     window.addTask = () => {
         const text = document.getElementById('taskInput').value;
+        const cat = document.getElementById('catInput').value;
         if(!text) return;
-        push(ref(db, `users/${auth.currentUser.uid}/tasks`), {
-            text, done: false, owner: selectedPartner
-        });
+        push(ref(db, `users/${auth.currentUser.uid}/tasks`), { text, category: cat, done: false, owner: selectedPartner });
         document.getElementById('taskInput').value = "";
     };
 
-    window.toggleTask = (id, status) => {
-        update(ref(db, `users/${auth.currentUser.uid}/tasks/${id}`), { done: !status });
-    };
+    window.toggleTask = (id, status) => update(ref(db, `users/${auth.currentUser.uid}/tasks/${id}`), { done: !status });
+    window.deleteTask = (id) => remove(ref(db, `users/${auth.currentUser.uid}/tasks/${id}`));
 
-    function renderTasks(tasks, uid) {
+    function renderTasks(tasks) {
         const list = document.getElementById('todoList');
         list.innerHTML = "";
         if(!tasks) return;
         Object.keys(tasks).forEach(id => {
             const t = tasks[id];
-            list.innerHTML += `
-                <div class="item-row ${t.done ? 'completed' : ''}">
-                    <input type="checkbox" ${t.done ? 'checked' : ''} onclick="toggleTask('${id}', ${t.done})">
-                    <span>${t.text} <small>(${t.owner})</small></span>
-                </div>`;
+            list.innerHTML += `<div class="item-row ${t.done ? 'completed' : ''}">
+                <input type="checkbox" ${t.done ? 'checked' : ''} onclick="toggleTask('${id}', ${t.done})">
+                <span style="flex:1"><b>[${t.category}]</b> ${t.text} <small>(${t.owner})</small></span>
+                <button class="delete-btn" onclick="deleteTask('${id}')">❌</button>
+            </div>`;
         });
+    }
+
+    // INVITÉS
+    window.addGuest = () => {
+        const name = document.getElementById('guestName').value;
+        if(!name) return;
+        push(ref(db, `users/${auth.currentUser.uid}/guests`), { name, addedBy: selectedPartner });
+        document.getElementById('guestName').value = "";
+    };
+    window.deleteGuest = (id) => remove(ref(db, `users/${auth.currentUser.uid}/guests/${id}`));
+
+    function renderGuests(guests) {
+        const list = document.getElementById('guestList');
+        list.innerHTML = "";
+        if(!guests) return;
+        Object.keys(guests).forEach(id => {
+            const g = guests[id];
+            list.innerHTML += `<div class="item-row">
+                <span style="flex:1">${g.name} <small>(par ${g.addedBy})</small></span>
+                <button class="delete-btn" onclick="deleteGuest('${id}')">❌</button>
+            </div>`;
+        });
+    }
+
+    function updateCountdown(date) {
+        const diff = new Date(date).getTime() - new Date().getTime();
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        document.getElementById('countdown').innerText = days > 0 ? `J - ${days} jours` : "C'est le grand jour !";
     }
 
     window.logout = () => signOut(auth);
