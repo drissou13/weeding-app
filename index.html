@@ -2,46 +2,151 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wedding Cloud | Budget & Planning</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Wedding Cloud | Dashboard</title>
     <style>
-        :root { --sage: #8A9A5B; --cream: #F9F8F4; --gold: #D4AF37; --dark: #333; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--cream); color: var(--dark); margin: 0; padding: 10px; transition: background 0.5s ease; }
-        .auth-container { max-width: 400px; margin: 50px auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
-        .container { max-width: 650px; margin: 0 auto; display: none; }
-        .card { background: rgba(255, 255, 255, 0.9); padding: 20px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        button { width: 100%; padding: 12px; background: var(--sage); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .profile-btn { width: auto; background: transparent; color: var(--sage); border: 2px solid var(--sage); margin: 5px; padding: 8px 15px; }
-        .profile-btn.active { background: var(--sage); color: white; }
-        .item-row { display: flex; align-items: center; gap: 10px; padding: 12px; border-bottom: 1px solid #eee; }
+        :root { --sage: #8A9A5B; --cream: #F9F8F4; --gold: #D4AF37; --dark: #333; --white: #ffffff; }
+        
+        body { 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            background: var(--cream); 
+            color: var(--dark); 
+            margin: 0; 
+            padding: env(safe-area-inset-top) 15px 80px 15px;
+            transition: background 0.4s ease;
+        }
+
+        /* --- AUTH SCREEN --- */
+        .auth-container { 
+            max-width: 400px; 
+            margin: 10vh auto; 
+            background: var(--white); 
+            padding: 30px; 
+            border-radius: 20px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
+            text-align: center; 
+        }
+
+        /* --- LAYOUT --- */
+        .container { max-width: 800px; margin: 0 auto; display: none; }
+        
+        header { text-align: center; padding: 20px 0; }
+        h1 { font-family: 'Georgia', serif; font-size: 2.2rem; color: var(--sage); margin-bottom: 5px; }
+        
+        .budget-banner { 
+            background: var(--sage); 
+            color: white; 
+            padding: 15px; 
+            border-radius: 12px; 
+            font-size: 1.2rem; 
+            font-weight: bold;
+            margin: 15px 0;
+            box-shadow: 0 4px 12px rgba(138, 154, 91, 0.3);
+        }
+
+        /* --- CARDS --- */
+        .card { 
+            background: rgba(255, 255, 255, 0.95); 
+            padding: 20px; 
+            border-radius: 18px; 
+            margin-bottom: 20px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05); 
+        }
+
+        /* --- INPUTS & BUTTONS --- */
+        input, select { 
+            width: 100%; 
+            padding: 14px; 
+            margin: 8px 0; 
+            border: 1px solid #ddd; 
+            border-radius: 10px; 
+            box-sizing: border-box; 
+            font-size: 16px; /* Évite le zoom auto sur iPhone */
+        }
+
+        .btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
+        
+        button { 
+            background: var(--sage); 
+            color: white; 
+            border: none; 
+            padding: 14px; 
+            border-radius: 10px; 
+            font-weight: bold; 
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+        button:active { transform: scale(0.98); }
+
+        /* --- LISTS --- */
+        .item-row { 
+            display: flex; 
+            align-items: center; 
+            padding: 12px; 
+            border-bottom: 1px solid #f0f0f0; 
+            gap: 12px;
+        }
+        .item-row:last-child { border-bottom: none; }
+        .item-info { flex: 1; }
+        .item-info b { color: var(--sage); font-size: 0.9rem; }
         .completed { text-decoration: line-through; opacity: 0.5; }
-        header { text-align: center; margin-bottom: 20px; }
-        .budget-banner { font-size: 1.5em; color: var(--sage); font-weight: bold; margin: 10px 0; }
-        .delete-btn { background: none; color: #ff7675; border: none; cursor: pointer; width: auto; }
-        .theme-picker { position: fixed; bottom: 20px; right: 20px; background: white; padding: 10px; border-radius: 50px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+
+        /* --- PROFILE SWITCHER --- */
+        .profile-switcher { display: flex; justify-content: center; gap: 10px; margin: 15px 0; }
+        .profile-btn { 
+            background: white; 
+            color: var(--sage); 
+            border: 2px solid var(--sage); 
+            padding: 8px 20px; 
+            border-radius: 20px; 
+        }
+        .profile-btn.active { background: var(--sage); color: white; }
+
+        /* --- MOBILE BOTTOM BAR --- */
+        .theme-picker { 
+            position: fixed; 
+            bottom: 20px; 
+            left: 50%; 
+            transform: translateX(-50%);
+            background: white; 
+            padding: 8px 15px; 
+            border-radius: 30px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        /* --- RESPONSIVE DESKTOP --- */
+        @media (min-width: 600px) {
+            .input-row-desktop { display: flex; gap: 10px; align-items: center; }
+            .input-row-desktop input { margin: 0; }
+            .input-row-desktop button { width: 60px; }
+        }
     </style>
 </head>
 <body>
 
     <div id="authScreen" class="auth-container">
-        <h2 id="authTitle">Se connecter</h2>
+        <h2 id="authTitle">Bienvenue</h2>
         <input type="email" id="email" placeholder="Email du couple">
         <input type="password" id="password" placeholder="Mot de passe">
         <div id="registerFields" style="display:none;">
-            <input type="text" id="p1_name" placeholder="Prénom Partenaire 1">
-            <input type="text" id="p2_name" placeholder="Prénom Partenaire 2">
+            <input type="text" id="p1_name" placeholder="Prénom 1">
+            <input type="text" id="p2_name" placeholder="Prénom 2">
             <input type="date" id="wedding_date">
         </div>
-        <button id="mainAuthBtn" onclick="handleAuth()">Connexion</button>
-        <p onclick="toggleAuthMode()" id="toggleText" style="cursor:pointer; font-size: 0.9em; margin-top: 15px; color: var(--sage); text-decoration: underline;">Créer un espace</p>
+        <button id="mainAuthBtn" onclick="handleAuth()" style="width:100%; margin-top:10px;">Connexion</button>
+        <p onclick="toggleAuthMode()" id="toggleText" style="cursor:pointer; font-size: 0.9em; margin-top: 15px; color: var(--sage);">Créer un compte pour le couple</p>
     </div>
 
     <div id="appScreen" class="container">
         <header>
-            <h1 id="coupleTitle">Chargement...</h1>
-            <p id="countdown"></p>
-            <div class="budget-banner">Total Budget : <span id="totalDisplay">0</span> €</div>
+            <h1 id="coupleTitle">... & ...</h1>
+            <p id="countdown" style="color: var(--gold); font-weight: bold;"></p>
+            <div class="budget-banner">Budget : <span id="totalDisplay">0</span> €</div>
+            
             <div class="profile-switcher">
                 <button class="profile-btn" id="btnP1" onclick="switchUser(1)"></button>
                 <button class="profile-btn" id="btnP2" onclick="switchUser(2)"></button>
@@ -49,30 +154,31 @@
         </header>
 
         <section class="card">
-            <h3>✅ Checklist & Budget</h3>
-            <input type="text" id="taskInput" placeholder="Nom du prestataire / tâche">
-            <div style="display:flex; gap:10px;">
-                <input type="text" id="catInput" placeholder="Catégorie (DJ, Fleurs...)" style="flex:1">
-                <input type="number" id="priceInput" placeholder="Prix (€)" style="flex:1">
-                <button onclick="addTask()" style="width:50px;">+</button>
+            <h3>📝 Planning & Dépenses</h3>
+            <input type="text" id="taskInput" placeholder="Tâche ou prestataire (ex: Photographe)">
+            <div class="input-row-desktop">
+                <input type="text" id="catInput" placeholder="Catégorie (ex: Image)">
+                <input type="number" id="priceInput" placeholder="Prix (€)">
+                <button onclick="addTask()">+</button>
             </div>
-            <div id="todoList"></div>
+            <div id="todoList" style="margin-top:15px;"></div>
         </section>
 
         <section class="card">
-            <h3>👥 Invités</h3>
-            <div style="display:flex; gap:5px;">
-                <input type="text" id="guestName" placeholder="Nom de l'invité" style="flex:2">
-                <button onclick="addGuest()" style="width:50px;">+</button>
+            <h3>👥 Liste des invités</h3>
+            <div class="input-row-desktop">
+                <input type="text" id="guestName" placeholder="Nom de l'invité">
+                <button onclick="addGuest()">+</button>
             </div>
-            <div id="guestList"></div>
+            <div id="guestList" style="margin-top:15px;"></div>
         </section>
 
-        <button onclick="logout()" style="background:none; color:#999; border:none; margin-top:20px;">Déconnexion</button>
+        <button onclick="logout()" style="background:none; color:#888; border:none; width:100%; margin-bottom: 40px;">Se déconnecter</button>
     </div>
 
     <div class="theme-picker" id="themePicker" style="display:none;">
-        🎨 Fond : <input type="color" id="bgPicker" onchange="changeBg(this.value)" value="#F9F8F4">
+        <span style="font-size: 14px; font-weight: bold;">🎨 Fond</span>
+        <input type="color" id="bgPicker" onchange="changeBg(this.value)" style="width:40px; height:30px; padding:0; border:none; background:none;">
     </div>
 
     <script type="module" src="script.js"></script>
